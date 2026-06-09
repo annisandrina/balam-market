@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGIS Persebaran Pasar Tradisional Bandar Lampung</title>
+
+    <!-- FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- LEAFLET -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <!-- SEARCH -->
+    <link rel="stylesheet"
+        href="https://unpkg.com/leaflet-search@3.0.9/dist/leaflet-search.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        body {
+            background: #f8f4ef;
+        }
+
+        header {
+            background: #d8c3a5;
+            padding: 20px;
+            text-align: center;
+            color: #5c4033;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 28px;
+        }
+
+        header p {
+            margin-top: 5px;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 340px;
+            background: #efe3d4;
+            padding: 20px;
+            overflow-y: auto;
+            height: calc(100vh - 88px);
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .profile {
+            text-align: center;
+        }
+
+        .profile img {
+            width: 160px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 5px solid #d8c3a5;
+            margin-bottom: 15px;
+        }
+
+        .profile h2 {
+            color: #5c4033;
+        }
+
+        .stat-number {
+            font-size: 40px;
+            font-weight: bold;
+            color: #a67b5b;
+            text-align: center;
+        }
+
+        #map {
+            flex: 1;
+            height: calc(100vh - 88px);
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            background: #a67b5b;
+            display: inline-block;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        footer {
+            text-align: center;
+            background: #d8c3a5;
+            padding: 12px;
+            color: #5c4033;
+        }
+
+        .leaflet-popup-content {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🤎🍪 Persebaran Pasar Tradisional Bandar Lampung 🍪🤎</h1>
+        <p>🦢 WebGIS Pendidikan Geografi 🦢</p>
+    </header>
+
+    <div class="container">
+
+        <div class="sidebar">
+
+            <div class="card profile">
+
+                <img src="../Assets/foto profile.jpeg" alt="Foto Profil">
+
+                <h2>🤎 Annisa Sandrina</h2>
+
+                <p>🍪 NPM : 2313034039</p>
+
+                <p>🦢 Pendidikan Geografi</p>
+
+            </div>
+
+            <div class="card">
+                <h3>🍪 Tentang WebGIS</h3>
+                <br>
+                <p>
+                    WebGIS ini menampilkan persebaran pasar tradisional
+                    di Kota Bandar Lampung menggunakan data spasial
+                    berbentuk GeoJSON.
+                </p>
+            </div>
+
+            <div class="card">
+
+                <h3>📊 Statistik</h3>
+
+                <div class="stat-number" id="jumlahPasar">
+                    0
+                </div>
+
+                <center>
+                    🤎 Total Pasar Tradisional
+                </center>
+
+            </div>
+
+            <div class="card">
+
+                <h3>🗺️ Legenda</h3>
+
+                <br>
+
+                <p>
+                    <span class="legend-dot"></span>
+                    Pasar Tradisional
+                </p>
+
+            </div>
+
+        </div>
+
+        <div id="map"></div>
+
+    </div>
+
+    <footer>
+        Made with 🤎🍪 by Annisa Sandrina 🦢
+    </footer>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script src="https://unpkg.com/leaflet-search@3.0.9/dist/leaflet-search.min.js"></script>
+
+    <script>
+
+        var map = L.map('map').setView([-5.429, 105.261], 12);
+
+        L.tileLayer(
+            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+                attribution: '&copy; OpenStreetMap'
+            }
+        ).addTo(map);
+
+        fetch('../Data/PERSEBARAN PASAR TRADISIONAL LAMPUNG.geojson')
+            .then(response => response.json())
+            .then(data => {
+
+                document.getElementById('jumlahPasar').innerHTML =
+                    data.features.length;
+
+                var pasarLayer = L.geoJSON(data, {
+
+                    pointToLayer: function (feature, latlng) {
+
+                        return L.circleMarker(latlng, {
+
+                            radius: 10,
+                            fillColor: "#a67b5b",
+                            color: "#ffffff",
+                            weight: 2,
+                            fillOpacity: 0.9
+
+                        });
+
+                    },
+
+                    onEachFeature: function (feature, layer) {
+
+                        layer.bindPopup(`
+                            <div>
+                                <h3>🤎🍪</h3>
+                                <b>${feature.properties.name}</b>
+                                <br><br>
+                                🏪 Pasar Tradisional
+                                <br>
+                                🗺️ Bandar Lampung
+                            </div>
+                        `);
+
+                    }
+
+                }).addTo(map);
+
+                new L.Control.Search({
+
+                    layer: pasarLayer,
+
+                    propertyName: 'name',
+
+                    zoom: 16,
+
+                    initial: false,
+
+                    marker: false,
+
+                    textPlaceholder: '🔍 Cari pasar...'
+
+                }).addTo(map);
+
+                map.fitBounds(pasarLayer.getBounds());
+
+            });
+
+    </script>
+
+</body>
+
+</html>
